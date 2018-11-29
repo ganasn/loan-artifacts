@@ -7,22 +7,24 @@
     <link rel="stylesheet" href="css/message.css">
     
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
+    <script src="js/vendor/aws-cognito-sdk.min.js"></script>
+    <script src="js/vendor/amazon-cognito-identity.min.js"></script>
     <script src="js/vendor/jquery-3.1.0.js"></script>
-    <script src="newuser.js"></script>
+    <script src="config.js"></script>  
     <!-- <script src="js/vendor/aws-cognito-sdk.min.js"></script> -->
     <!-- <script src="js/vendor/amazon-cognito-identity.min.js"></script> -->
     <!-- <script src="app.js"></script> -->
   </head>
-  <body>`
+  <body>
     <section class="form-wrap">
       <h1>Register</h1>
       <form id="registrationForm">
-        <input type="email" id="emailInputRegister" placeholder="Email" pattern=".*" required>
-        <input type="password" id="passwordInputRegister" placeholder="Password" pattern=".*" required>
-        <input type="password" id="password2InputRegister" placeholder="Confirm Password" pattern=".*" required>
-        <input type="submit" value="Register" onclick="sign">
+        <input type="email" id="emailInputRegister" placeholder="Email" pattern=".*" required placeholder="gnarayan@hmst.com">
+        <input type="password" id="passwordInputRegister" placeholder="Password" pattern=".*" required placeholder="Password1">
+        <input type="password" id="password2InputRegister" placeholder="Confirm Password" pattern=".*" required placeholder="Password1">
+        <input type="submit" value="Register">
       </form>
   </section>
-    
+  <script src="newuser.js"></script>
   </body>
 </html>

@@ -1,31 +1,38 @@
 //signup.js
 
-function signUp(){
-    var attributeList = [];
- 
-    var dataEmail = {
-        Name : 'email',
-        Value : $('#emailInputRegister').val() // your email here
-    };
-    var dataPhoneNumber = {
-        Name : 'phone_number',
-        Value : '...' // your phone number here with +country code and no delimiters in front
-    };
-    var attributeEmail = 
-    new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
-    var attributePhoneNumber = 
-    new AmazonCognitoIdentity.CognitoUserAttribute(dataPhoneNumber);
-     
-    attributeList.push(attributeEmail);
-    attributeList.push(attributePhoneNumber);
-     
-    var cognitoUser;
-    userPool.signUp('username', 'password', attributeList, null, function(err, result){
-        if (err) {
-            alert(err);
-            return;
+$('#registrationForm').submit(function (e){
+
+    
+        e.preventDefault();
+        
+        var attributeList = [];
+        var email = $('#emailInputRegister').val();
+    
+    
+        var dataEmail = {
+            Name : 'email',
+            Value : email
+        };
+        
+    
+        if($('#passwordInputRegister').val() === $('#password2InputRegister').val()) {
+            var password = $('#passwordInputRegister').val();
         }
-        cognitoUser = result.user;
-        console.log('user name is ' + cognitoUser.getUsername());
-    });
-}
+        else {
+            alert('Passwords do not match');
+        }
+
+        var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail); 
+        attributeList.push(attributeEmail);
+
+        var cognitoUser;
+        userPool.signUp(email, password, attributeList, null, function(err, result){
+            if (err) {
+                alert(err);
+                return;
+            }
+            cognitoUser = result.user;
+            console.log('user name is ' + cognitoUser.getUsername());
+            window.location.href = 'home.html';
+        });
+});

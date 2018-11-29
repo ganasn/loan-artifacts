@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="css/font.css">
+    <link rel="stylesheet" href="css/normalize.css">
+    <!-- <link rel="stylesheet" href="css/index.css"> -->
+    <link rel="stylesheet" href="css/message.css">
+    
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
+    <script src="js/vendor/jquery-3.1.0.js"></script>
+    <script src="newuser.js"></script>
+    <!-- <script src="js/vendor/aws-cognito-sdk.min.js"></script> -->
+    <!-- <script src="js/vendor/amazon-cognito-identity.min.js"></script> -->
+    <!-- <script src="app.js"></script> -->
+  </head>
+  <body>`
+    <section class="form-wrap">
+      <h1>Register</h1>
+      <form id="registrationForm">
+        <input type="email" id="emailInputRegister" placeholder="Email" pattern=".*" required>
+        <input type="password" id="passwordInputRegister" placeholder="Password" pattern=".*" required>
+        <input type="password" id="password2InputRegister" placeholder="Confirm Password" pattern=".*" required>
+        <input type="submit" value="Register" onclick="sign">
+      </form>
+  </section>
+    
+  </body>
+</html>

@@ -4,3 +4,5 @@ var poolData = {
 };
 
 var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+var accessToken;
+var idToken;

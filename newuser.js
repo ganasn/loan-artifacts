@@ -1,5 +1,6 @@
 //signup.js
 
+var cognitoUser;
 $('#registrationForm').submit(function (e){
 
     
@@ -24,8 +25,7 @@ $('#registrationForm').submit(function (e){
 
         var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail); 
         attributeList.push(attributeEmail);
-
-        var cognitoUser;
+      
         userPool.signUp(email, password, attributeList, null, function(err, result){
             if (err) {
                 alert(err);
@@ -33,6 +33,6 @@ $('#registrationForm').submit(function (e){
             }
             cognitoUser = result.user;
             console.log('user name is ' + cognitoUser.getUsername());
-            window.location.href = 'home.html';
+            window.location.href = 'newUserVerify.html';
         });
 });

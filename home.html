@@ -5,14 +5,16 @@
     <link rel="stylesheet" href="css/normalize.css">
     <!-- <link rel="stylesheet" href="css/index.css"> -->
     <link rel="stylesheet" href="css/message.css">
+
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
-    <script src="js/vendor/jquery-3.1.0.js"></script>
-    <script src="js/vendor/bootstrap.min.js"></script>
     <script src="js/vendor/aws-cognito-sdk.min.js"></script>
     <script src="js/vendor/amazon-cognito-identity.min.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/cognito-auth.js"></script>
-    <script src="home.js"></script>
+    <script src="js/vendor/jquery-3.1.0.js"></script>
+    <!-- <script src="js/vendor/bootstrap.min.js"></script> -->
+    <script src="config.js"></script>
+    <script src="userLogin.js"></script>
+    <!-- <script src="home.js"></script> -->
+    
     <script>
        function getHtml(template) {
           return template.join('\n');
@@ -20,9 +22,9 @@
        listAlbums();
     </script>
   </head>
+  
   <body>
     <h1>Artifacts</h1>
-    <div id="app"></div>
-    
+    <div id="app"></div>  
   </body>
 </html>

@@ -1,18 +1,28 @@
-var albumBucketName = 'serverlesstestwebapp';
-var bucketRegion = 'us-west-2';
-var IdentityPoolId = 'us-west-2:6621b327-8e72-4ce5-8adb-fc250ce2c06a';
+// var albumBucketName = 'serverlesstestwebapp';
+// var bucketRegion = 'us-west-2';
+// var IdentityPoolId = 'us-west-2:6621b327-8e72-4ce5-8adb-fc250ce2c06a';
 
-AWS.config.update({
-  region: bucketRegion,
-  credentials: new AWS.CognitoIdentityCredentials({
-    IdentityPoolId: IdentityPoolId
-  })
-});
+// AWS.config.region = bucketRegion;
 
-var s3 = new AWS.S3({
-  apiVersion: '2006-03-01',
-  params: {Bucket: albumBucketName}
-});
+// AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+//   IdentityPoolId: IdentityPoolId, 
+//   Logins: { cognitoIdp :idToken}
+// });
+
+// AWS.config.credentials.get(function(err){
+//   if(err){
+//     alert(err);
+//   }
+// });
+
+// alert("Home: " + AWS.config.credentials.AmazonCognitoIdentity);
+
+// var s3 = new AWS.S3({
+//   apiVersion: '2006-03-01',
+//   params: {Bucket: albumBucketName}
+// });
+
+alert("Home: " + s3);
 
 function addPhoto(albumName) {
   var files = document.getElementById('photoupload').files;
@@ -38,7 +48,8 @@ function addPhoto(albumName) {
 }
 
 function listAlbums() {
-  s3.listObjects({Delimiter: '/'}, function(err, data) {
+  alert(albumBucketName);
+  s3.listObjects({Bucket: albumBucketName, Delimiter: '/'}, function(err, data) {
     if (err) {
       return alert('There was an error listing your albums: ' + err.message);
       

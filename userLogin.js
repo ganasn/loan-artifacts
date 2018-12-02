@@ -25,13 +25,12 @@ var Artifacts = window.Artifacts || {};
         AWSCognito.config.region = _config.cognito.region;
     }
 
-    Artifacts.signOut = function signOut() {
-        userPool.getCurrentUser().signOut();
-    };
+    // Artifacts.signOut = function signOut() {
+    //     userPool.getCurrentUser().signOut();
+    // };
 
     Artifacts.authToken = new Promise(function fetchCurrentAuthToken(resolve, reject) {
         var cognitoUser = userPool.getCurrentUser();
-
         if (cognitoUser) {
             cognitoUser.getSession(function sessionCallback(err, session) {
                 if (err) {
@@ -114,9 +113,10 @@ var Artifacts = window.Artifacts || {};
         var email = $('#emailInputSignin').val();
         var password = $('#passwordInputSignin').val();
         event.preventDefault();
+        
         signin(email, password,
             function signinSuccess() {
-                alert('Successfully Logged In');
+                // alert('Successfully Logged In');
                 window.location.href = 'home.html';
             },
             function signinError(err) {

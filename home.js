@@ -4,6 +4,68 @@ var Artifacts = window.Artifacts || {};
 
 (function scopeWrapper($) {
 
+  var signinUrl = '/userLogin.html';
+
+  var poolData = {
+      UserPoolId: _config.cognito.userPoolId,
+      ClientId: _config.cognito.userPoolClientId
+  };
+
+  var userPool;
+
+  if (!(_config.cognito.userPoolId &&
+        _config.cognito.userPoolClientId &&
+        _config.cognito.region)) {
+      // $('#noCognitoMessage').show();
+      return;
+  }
+
+  userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+
+  if (typeof AWSCognito !== 'undefined') {
+      AWSCognito.config.region = _config.cognito.region;
+  }
+
+  // Artifacts.signOut = function signOut() {
+  //     userPool.getCurrentUser().signOut();
+  // };
+
+  Artifacts.authToken = new Promise(function fetchCurrentAuthToken(resolve, reject) {
+      var cognitoUser = userPool.getCurrentUser();
+      alert('Init cognitoUser: ' + cognitoUser);
+
+      if (cognitoUser) {
+          cognitoUser.getSession(function sessionCallback(err, session) {
+              if (err) {
+                alert('in err');
+                reject(err);
+              } else if (!session.isValid()) {
+                alert('in else if');
+                resolve(null);
+              } else {
+                alert('in else');  
+                resolve(session.getIdToken().getJwtToken());
+              }
+          });
+      } else {
+          resolve(null);
+      }
+  });
+
+  var authToken;
+  Artifacts.authToken.then(function setAuthToken(token) {
+      if (token) {
+        alert('in if token');
+        authToken = token;
+      } else {
+        alert('in else token');
+        // window.location.href = 'userLogin.html';
+      }
+  }).catch(function handleTokenError(error) {
+      alert('Token error catch: ' + error);
+      // window.location.href = 'userLogin.html';
+  });
+  
   $(function onDocReady() {
     listAlbums();
   });
@@ -40,7 +102,7 @@ var Artifacts = window.Artifacts || {};
       sessionToken: Artifacts.authToken
     });
 
-    console.log(s3);
+    console.log(s3.credentials);
     
     alert('before listObj()');
     s3.listObjects({Bucket: albumBucketName, Delimiter: '/'}, function(err, data) {

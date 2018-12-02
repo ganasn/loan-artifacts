@@ -5,7 +5,7 @@
 //     params: {Bucket: albumBucketName}
 //   });
 
-var s3; 
+var s3 = new AWS.S3(); 
 
 var Artifacts = window.Artifacts || {};
 
@@ -23,11 +23,14 @@ function handleLogin() {
         Username : userId,
         Password : userPwd
     };    
+    
     var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+    
     var userData = {
         Username : userId,
         Pool : userPool
     }; 
+    
     var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
     
     cognitoUser.authenticateUser(authenticationDetails, {
@@ -49,22 +52,22 @@ function handleLogin() {
             console.log("current user: " + userPool.getCurrentUser());
             alert("User Login: " + AWS.config.credentials.AmazonCognitoIdentity);
 
-            // AWS.config.credentials.refresh((error) => {
-            //     if (error) {
-            //          alert("AWS.config.credentials.refresh " + error);
-            //     } else {
-            //          // Instantiate aws sdk service objects now that the credentials have been updated.
-            //          s3.credentials = AWS.config.credentials.get(function (err){
-            //              if(err) {
-            //                 alert("AWS.config.credentials.get " + error);
-            //              }
-            //          });
-            //          console.log('Successfully logged!');
-            //          console.log(AWS.config);
-            //          console.log(s3);                 
-            //          alert('Breakpoint');
-            //     }
-            // });
+            AWS.config.credentials.refresh((error) => {
+                if (error) {
+                     alert("AWS.config.credentials.refresh " + error);
+                } else {
+                     // Instantiate aws sdk service objects now that the credentials have been updated.
+                     s3.credentials = AWS.config.credentials.get(function (err){
+                         if(err) {
+                            alert("AWS.config.credentials.get " + error);
+                         }
+                     });
+                     console.log('Successfully logged!');
+                     console.log(AWS.config);
+                     console.log(s3);                 
+                     alert('Breakpoint');
+                }
+            });
 
             window.location.href = 'home.html';
         },
@@ -77,31 +80,7 @@ function handleLogin() {
 }
 
 function listAlbums() {
-
-    Artifacts.authToken = new Promise(function fetchCurrentAuthToken(resolve, reject){
-      var cognitoUser = userPool.getCurrentUser();
-
-      if (cognitoUser) {
-        cognitoUser.getSession(function sessionCallBack(err, session){
-          if(err) {
-            reject(err);
-          }
-          else if (!session.isValid()) {
-            resolve(null);
-          }
-          else {
-            resolve(session.getIdToken().getJwtToken());
-          }
-        });
-      }
-      else {
-        resolve(null);
-      }
-    });
-  
-    console.log(AWS.config);
-    console.log(s3);
-    s3.listObjects({Bucket: albumBucketName, Delimiter: '/'}, function(err, data) {
+    s3.listObjects({Bucket: _config.albumBucketName, Delimiter: '/'}, function(err, data) {
       if (err) {
         return alert('There was an error listing your albums: ' + err.message);
         

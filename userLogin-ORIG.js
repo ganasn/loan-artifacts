@@ -1,48 +1,106 @@
-//home.js
+//userLogin.js
+
+// var s3 = new AWS.S3({
+//     apiVersion: '2006-03-01',
+//     params: {Bucket: albumBucketName}
+//   });
+
+var s3; 
 
 var Artifacts = window.Artifacts || {};
 
-(function scopeWrapper($) {
+$('#loginForm').submit(function (e){
+    e.preventDefault();
+    handleLogin();
+}); 
 
-  $(function onDocReady() {
-    listAlbums();
-  });
 
-  function addPhoto(albumName) {
-    var files = document.getElementById('photoupload').files;
-    if (!files.length) {
-      return alert('Please choose a file to upload first.');
-    }
-    var file = files[0];
-    var fileName = file.name;
-    var albumPhotosKey = encodeURIComponent(albumName) + '//';
+function handleLogin() {
+    var userId = $('#emailInputSignin').val();
+    var userPwd = $('#passwordInputSignin').val();
+    
+    var authenticationData = {
+        Username : userId,
+        Password : userPwd
+    };    
+    var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+    var userData = {
+        Username : userId,
+        Pool : userPool
+    }; 
+    var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+    
+    cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: function (result) {
+            accessToken = result.getAccessToken().getJwtToken();
+            AWS.config.region = bucketRegion;
+            idToken = result.idToken.jwtToken;
+            console.log(idToken);
+            console.log(accessToken);
+            
 
-    var photoKey = albumPhotosKey + fileName;
-    s3.upload({
-      Key: photoKey,
-      Body: file,
-      ACL: 'public-read'
-    }, function(err, data) {
-      if (err) {
-        return alert('There was an error uploading your photo: ', err.message);
+            AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                IdentityPoolId: IdentityPoolId, 
+                Logins: {
+                    'cognito-idp:us-west-2:103525954564:userpool/us-west-2_c8Uw0viF4' : result.getIdToken().getJwtToken()
+                }
+            });
+
+            console.log("current user: " + userPool.getCurrentUser());
+            alert("User Login: " + AWS.config.credentials.AmazonCognitoIdentity);
+
+            // AWS.config.credentials.refresh((error) => {
+            //     if (error) {
+            //          alert("AWS.config.credentials.refresh " + error);
+            //     } else {
+            //          // Instantiate aws sdk service objects now that the credentials have been updated.
+            //          s3.credentials = AWS.config.credentials.get(function (err){
+            //              if(err) {
+            //                 alert("AWS.config.credentials.get " + error);
+            //              }
+            //          });
+            //          console.log('Successfully logged!');
+            //          console.log(AWS.config);
+            //          console.log(s3);                 
+            //          alert('Breakpoint');
+            //     }
+            // });
+
+            window.location.href = 'home.html';
+        },
+
+        onFailure: function(err) {
+            alert(err);
+        },
+
+    });
+}
+
+function listAlbums() {
+
+    Artifacts.authToken = new Promise(function fetchCurrentAuthToken(resolve, reject){
+      var cognitoUser = userPool.getCurrentUser();
+
+      if (cognitoUser) {
+        cognitoUser.getSession(function sessionCallBack(err, session){
+          if(err) {
+            reject(err);
+          }
+          else if (!session.isValid()) {
+            resolve(null);
+          }
+          else {
+            resolve(session.getIdToken().getJwtToken());
+          }
+        });
       }
-      alert('Successfully uploaded photo.');
-      viewAlbum(albumName);
+      else {
+        resolve(null);
+      }
     });
-  }
-
-  function listAlbums() {
-    
-    var albumBucketName = _config.albumBucketName;    
-    var s3 = new AWS.S3({
-      apiVersion: '2006-03-01',
-      params: {Bucket: albumBucketName},
-      sessionToken: Artifacts.authToken
-    });
-
+  
+    console.log(AWS.config);
     console.log(s3);
-    
-    alert('before listObj()');
     s3.listObjects({Bucket: albumBucketName, Delimiter: '/'}, function(err, data) {
       if (err) {
         return alert('There was an error listing your albums: ' + err.message);
@@ -81,6 +139,31 @@ var Artifacts = window.Artifacts || {};
     });
   }
 
+  function addPhoto(albumName) {
+    var files = document.getElementById('photoupload').files;
+    if (!files.length) {
+      return alert('Please choose a file to upload first.');
+    }
+    var file = files[0];
+    var fileName = file.name;
+    var albumPhotosKey = encodeURIComponent(albumName) + '//';
+  
+    var photoKey = albumPhotosKey + fileName;
+    s3.upload({
+      Key: photoKey,
+      Body: file,
+      ACL: 'public-read'
+    }, function(err, data) {
+      if (err) {
+        return alert('There was an error uploading your photo: ', err.message);
+      }
+      alert('Successfully uploaded photo.');
+      viewAlbum(albumName);
+    });
+  }
+  
+
+  
   function createAlbum(albumName) {
     albumName = albumName.trim();
     if (!albumName) {
@@ -106,7 +189,7 @@ var Artifacts = window.Artifacts || {};
       });
     });
   }
-
+  
   function viewAlbum(albumName) {
     var albumPhotosKey = encodeURIComponent(albumName) + '/';
     s3.listObjects({Prefix: albumPhotosKey}, function(err, data) {
@@ -116,7 +199,7 @@ var Artifacts = window.Artifacts || {};
       // `this` references the AWS.Response instance that represents the response
       var href = this.request.httpRequest.endpoint.href;
       var bucketUrl = href + albumBucketName + '/';
-
+  
       var photos = data.Contents.map(function(photo) {
         var photoKey = photo.Key;
         var photoUrl = bucketUrl + encodeURIComponent(photoKey);
@@ -147,7 +230,7 @@ var Artifacts = window.Artifacts || {};
         '<div>',
           getHtml(photos),
         '</div>',
-        '<input id="photoupload" type="file" multiple>',
+              '<input id="photoupload" type="file" multiple>',
         '<input id="photoupload" type="file">',			
         '<button id="addphoto" onclick="addPhoto(\'' + albumName +'\')">',
           'Add Photo',
@@ -159,34 +242,34 @@ var Artifacts = window.Artifacts || {};
       document.getElementById('app').innerHTML = getHtml(htmlTemplate);
     });
   }
-
+  
   function addPhoto(albumName) {
     var fileHolder = document.getElementsByTagName('input');
-    var i; 
-    for (i = 0; i < fileHolder.length; i++) {
-      var files = fileHolder[i].files;
-      if (files.length) {
-        files = [...files]
-        files.forEach(file => {
-          var fileName = file.name;
-          var albumPhotosKey = encodeURIComponent(albumName) + '//';
-          var photoKey = albumPhotosKey + fileName;
-          s3.upload({
-              Key: photoKey,
-              Body: file,
-              ACL: 'public-read'
-              }, function(err, data) {
-                  if (err) {
-                      return alert('There was an error uploading your photo: ', err.message);
-                  }
+      var i; 
+      for (i = 0; i < fileHolder.length; i++) {
+          var files = fileHolder[i].files;
+          if (files.length) {
+              files = [...files]
+              files.forEach(file => {
+                  var fileName = file.name;
+                  var albumPhotosKey = encodeURIComponent(albumName) + '//';
+                  var photoKey = albumPhotosKey + fileName;
+                  s3.upload({
+                          Key: photoKey,
+                          Body: file,
+                          ACL: 'public-read'
+                          }, function(err, data) {
+                                  if (err) {
+                                          return alert('There was an error uploading your photo: ', err.message);
+                                  }
               });    
           });
           // alert('Successfully uploaded photo.');
           viewAlbum(albumName);
-      }
-    }  
+          }
+      }  
   }
-
+  
   function deletePhoto(albumName, photoKey) {
     s3.deleteObject({Key: photoKey}, function(err, data) {
       if (err) {
@@ -196,7 +279,7 @@ var Artifacts = window.Artifacts || {};
       viewAlbum(albumName);
     });
   }
-
+  
   function deleteAlbum(albumName) {
     var albumKey = encodeURIComponent(albumName) + '/';
     s3.listObjects({Prefix: albumKey}, function(err, data) {
@@ -217,4 +300,3 @@ var Artifacts = window.Artifacts || {};
       });
     });
   }
-}(jQuery));
